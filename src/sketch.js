@@ -1,62 +1,101 @@
-class pObject {
-  constructor(p, x, y) {
-    this.id = Math.random().toString().slice(2);
-    this.p = p;
-    this.position = p.createVector(x, y);
+class Chemical {
+  constructor(name, color, amount = 0) {
+    this.name = name;
+    this.color = color;
+    this.textColor = color;
+    color.setAlpha(120);
+    this.liquidColor = color;
+    this.amount = amount;
+  }
+  getHeight() {
+    return this.amount;
   }
 }
-class pRect extends pObject {
-  constructor(p, x, y, w, h) {
-    super(p, x, y);
-    this.w = w;
-    this.h = h;
-    this.staticObj = staticObj;
+const sketch = (p) => {
+  let canvas;
+  let testTubes = [];
+  let selected_test_tube = null;
+  class pObject {
+    constructor(x, y) {
+      this.id = Math.random().toString().slice(2);
+      this.x = x;
+      this.y = y;
+    }
   }
-  right() {
-    return this.position.x + this.w;
+  class pRect extends pObject {
+    constructor(x, y, w, h) {
+      super(x, y);
+      this.w = w;
+      this.h = h;
+    }
+    right() {
+      return this.x + this.w;
+    }
+    left() {
+      return this.x;
+    }
+    top() {
+      return this.y;
+    }
+    bottom() {
+      return this.y + this.h;
+    }
   }
-  left() {
-    return this.position.x;
-  }
-  top() {
-    return this.position.y;
-  }
-  bottom() {
-    return this.position.y + this.h;
-  }
-}
+  let tWidth = 50;
+  let tHeight = 500;
+  class TestTube extends pRect {
+    fill_color = p.color(10, 20);
+    stroke_color = p.color(150);
+    constructor(x = 0, y = 0, chemical = null) {
+      super(x, y, tWidth, tHeight);
+      this.width = tWidth;
+      this.height = tHeight;
+      this.chemical = chemical;
+    }
+    draw(p) {
+      // test tube
+      p.fill(this.fill_color);
+      p.stroke(this.stroke_color);
+      p.strokeWeight(4);
+      p.rect(this.x, this.y, this.width, this.height, 0, 0, 40, 40);
+      //lid line
+      p.stroke(this.stroke_color);
+      p.strokeWeight(10);
+      p.line(this.x, this.y, this.x + this.width, this.y);
+      p.strokeWeight(4);
+      // chemical level
+      if (!this.chemical) {
+        return;
+      }
+      p.fill(this.chemical.liquidColor);
+      p.noStroke();
+      p.rect(
+        this.x + 2,
+        this.y + this.height - this.chemical.getHeight(),
+        this.width - 4,
+        this.chemical.getHeight() - 2,
+        0,
+        0,
+        40,
+        40
+      );
+      //name
+      p.fill(this.chemical.textColor);
+      p.textSize(20);
+      p.textAlign(p.CENTER);
+      p.text(
+        this.chemical.name,
+        this.x + this.width / 2,
+        this.y + this.height + 30
+      );
+    }
 
-class TestTube extends pRect {
-  width = 50;
-  height = 500;
-  waterLevel = 0;
-  constructor(p, x = 0, y = 0) {
-    super(p, x, y, this.width, this.height);
-    this.x = x;
-    this.y = y;
+    fill(chemical) {
+      this.chemical = chemical;
+    }
   }
-  draw(p) {
-    p.fill(10, 0, 10, 25);
-    p.stroke(2);
-    p.strokeWeight(4);
-    p.rect(this.x, this.y, this.width, this.height, 0, 0, 40, 40);
-    p.stroke(255);
-    // water lever
-    p.rect(
-      this.x,
-      this.y + this.height - this.waterLevel,
-      50,
-      this.waterLevel,
-      0,
-      0,
-      40,
-      40
-    );
-    p.line(this.x, this.y, this.x + this.width, this.y);
-  }
-}
-const collision_engine = {
-  rect_rect(pRect1, pRect2) {
+
+  function rect_rect_collision(pRect1, pRect2) {
     if (
       pRect2.right() < pRect1.left() ||
       pRect1.right() < pRect2.left() ||
@@ -66,19 +105,27 @@ const collision_engine = {
       return false;
     }
     return true;
-  },
-};
-const sketch = (p) => {
-  let canvas;
-  let testTubes = [];
-  let selected_test_tube = null;
+  }
+
   p.setup = () => {
     canvas = p.select("#canvas");
     p.createCanvas(canvas.width, canvas.height);
     p.background(255);
-    let t = new TestTube(p, 10, 50);
-    let t1 = new TestTube(p, 100, 50);
-    let t2 = new TestTube(p, 200, 50);
+    let t = new TestTube(
+      10,
+      50,
+      new Chemical("water", p.color(0, 50, 255), 100)
+    );
+    let t1 = new TestTube(
+      100,
+      50,
+      new Chemical("hcl", p.color(255, 0, 0), 200)
+    );
+    let t2 = new TestTube(
+      200,
+      50,
+      new Chemical("nacl", p.color(150, 150, 200), 180)
+    );
     testTubes.push(t);
     testTubes.push(t1);
     testTubes.push(t2);
@@ -97,18 +144,17 @@ const sketch = (p) => {
     let x = p.mouseX;
     let y = p.mouseY;
 
-    let mouse = new pRect(x, y);
+    let mouse = new pRect(x, y, 10, 10);
     for (let i = 0; i < testTubes.length; i++) {
-      if (collision_engine.rect_rect(testTubes[i], mouse)) {
+      if (rect_rect_collision(testTubes[i], mouse)) {
         selected_test_tube = testTubes[i];
         break;
       }
     }
-    console.log(selected_test_tube);
   };
   p.mouseDragged = () => {
-    selected_test_tube.x = p.mouseX;
-    selected_test_tube.y = p.mouseY;
+    selected_test_tube.x = p.mouseX - tWidth / 2;
+    selected_test_tube.y = p.mouseY - tHeight / 2;
   };
 };
 
