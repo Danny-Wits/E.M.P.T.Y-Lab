@@ -2,9 +2,6 @@ class Chemical {
   constructor(name, color, amount = 0) {
     this.name = name;
     this.color = color;
-    this.textColor = color;
-    color.setAlpha(120);
-    this.liquidColor = color;
     this.amount = amount;
   }
   getHeight() {
@@ -67,7 +64,8 @@ const sketch = (p) => {
       if (!this.chemical) {
         return;
       }
-      p.fill(this.chemical.liquidColor);
+      this.chemical.color.setAlpha(170);
+      p.fill(this.chemical.color);
       p.noStroke();
       p.rect(
         this.x + 2,
@@ -80,8 +78,9 @@ const sketch = (p) => {
         40
       );
       //name
-      p.fill(this.chemical.textColor);
-      p.textSize(20);
+      this.chemical.color.setAlpha(255);
+      p.fill(this.chemical.color);
+      p.textSize(16);
       p.textAlign(p.CENTER);
       p.text(
         this.chemical.name,
@@ -107,28 +106,22 @@ const sketch = (p) => {
     return true;
   }
 
-  p.setup = () => {
+  p.setup = async () => {
     canvas = p.select("#canvas");
     p.createCanvas(canvas.width, canvas.height);
     p.background(255);
-    let t = new TestTube(
-      10,
-      50,
-      new Chemical("water", p.color(0, 50, 255), 100)
-    );
-    let t1 = new TestTube(
-      100,
-      50,
-      new Chemical("hcl", p.color(255, 0, 0), 200)
-    );
-    let t2 = new TestTube(
-      200,
-      50,
-      new Chemical("nacl", p.color(150, 150, 200), 180)
-    );
-    testTubes.push(t);
-    testTubes.push(t1);
-    testTubes.push(t2);
+    let chemicals = await p.loadJSON("./chemicals.json");
+    console.log(chemicals);
+
+    for (let i = 0; i < chemicals.length; i++) {
+      const chemical = chemicals[i];
+      let testTube = new TestTube(
+        100 + i * 100,
+        100,
+        new Chemical(chemical.name, p.color(chemical.color), p.random(50, 400))
+      );
+      testTubes.push(testTube);
+    }
   };
   p.windowResized = () => {
     canvas = p.select("#canvas");
@@ -153,6 +146,9 @@ const sketch = (p) => {
     }
   };
   p.mouseDragged = () => {
+    if (!selected_test_tube) {
+      return;
+    }
     selected_test_tube.x = p.mouseX - tWidth / 2;
     selected_test_tube.y = p.mouseY - tHeight / 2;
   };

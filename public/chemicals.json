@@ -1,0 +1,50 @@
+[
+    {
+        "name": "Water",
+        "formula": "H2O",
+        "molarMass": 18.015,
+        "color": "#AAC7E7"
+    },
+    {
+        "name": "Carbon Dioxide",
+        "formula": "CO2",
+        "molarMass": 44.01,
+        "color": "#6495ED"
+    },
+    {
+        "name": "Oxygen",
+        "formula": "O2",
+        "molarMass": 31.999,
+        "color": "#4682B4"
+    },
+    {
+        "name": "Ethanol",
+        "formula": "C2H5OH",
+        "molarMass": 46.07,
+        "color": "#1E90FF"
+    },
+    {
+        "name": "Bromine",
+        "formula": "Br2",
+        "molarMass": 159.808,
+        "color": "#A52A2A"
+    },
+    {
+        "name": "Iodine",
+        "formula": "I2",
+        "molarMass": 253.81,
+        "color": "#1C1C1C"
+    },
+    {
+        "name": "Copper ",
+        "formula": "Cu",
+        "molarMass": 63.546,
+        "color": "#B87333"
+    },
+    {
+        "name": "Sulfur",
+        "formula": "S8",
+        "molarMass": 256.52,
+        "color": "#FFD700"
+    }
+]
